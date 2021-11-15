@@ -29,6 +29,53 @@ async function run() {
     const database = client.db('bicycle_shop');
     const bikesCollection = database.collection('bikes');
     const ordersCollection = database.collection('orders');
+    const reviewsCollection = database.collection('reviews');
+    const usersCollection = database.collection('users');
+
+    // POST User [Save A New User to Database]
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
+      // console.log(result, 'res');
+      res.json(result);
+    });
+
+    // PUT Users [Upsert Google User]
+    app.put('/users', async (req, res) => {
+      const user = req.body;
+      const filter = { email: user.email };
+      const options = { upsert: true };
+      const updateDoc = { $set: user };
+      const result = await usersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      // console.log(result, 'g');
+      res.json(result);
+    });
+
+    // PUT Users [Update User to Make Admin]
+    app.put('/users/admin', async (req, res) => {
+      const email = req.body.email;
+      const filter = { email };
+      const updateDoc = { $set: { role: 'admin' } };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      console.log(result);
+      res.json(result);
+    });
+
+    // GET A User and Check if that User is Admin
+    app.get('/users/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await usersCollection.findOne(query);
+      let admin = false;
+      if (user?.role === 'admin') {
+        admin = true;
+      }
+      res.json({ admin });
+    });
 
     // GET All Bikes
     app.get('/bikes', async (req, res) => {
@@ -48,7 +95,6 @@ async function run() {
     // GET All Orders of a Specific USer
     app.get('/orders', async (req, res) => {
       const email = req.query.email;
-      console.log(req.query);
       const query = { email };
       const cursor = ordersCollection.find(query);
       const result = await cursor.toArray();
@@ -68,6 +114,13 @@ async function run() {
       console.log(id);
       const query = { _id: ObjectId(id) };
       const result = await ordersCollection.deleteOne(query);
+      res.json(result);
+    });
+
+    // GET All Reviews
+    app.get('/reviews', async (req, res) => {
+      const cursor = reviewsCollection.find({});
+      const result = await cursor.toArray();
       res.json(result);
     });
   } finally {
