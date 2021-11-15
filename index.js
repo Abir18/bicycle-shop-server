@@ -1,5 +1,6 @@
 const express = require('express');
 const { MongoClient } = require('mongodb');
+const ObjectId = require('mongodb').ObjectID;
 const cors = require('cors');
 require('dotenv').config();
 const app = express();
@@ -36,10 +37,37 @@ async function run() {
       res.json(result);
     });
 
+    // GET a Single Bike
+    app.get('/bikes/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await bikesCollection.findOne(query);
+      res.json(result);
+    });
+
+    // GET All Orders of a Specific USer
+    app.get('/orders', async (req, res) => {
+      const email = req.query.email;
+      console.log(req.query);
+      const query = { email };
+      const cursor = ordersCollection.find(query);
+      const result = await cursor.toArray();
+      res.json(result);
+    });
+
     // POST Orders
     app.post('/orders', async (req, res) => {
       const order = req.body;
       const result = await ordersCollection.insertOne(order);
+      res.json(result);
+    });
+
+    // Delete Order
+    app.delete('/orders/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: ObjectId(id) };
+      const result = await ordersCollection.deleteOne(query);
       res.json(result);
     });
   } finally {
