@@ -123,6 +123,12 @@ async function run() {
       const result = await cursor.toArray();
       res.json(result);
     });
+    // POST Review
+    app.post('/reviews', async (req, res) => {
+      const review = req.body;
+      const result = await reviewsCollection.insertOne(review);
+      res.json(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
