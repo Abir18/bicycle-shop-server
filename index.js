@@ -79,7 +79,7 @@ async function run() {
 
     // GET All Bikes
     app.get('/bikes', async (req, res) => {
-      const cursor = bikesCollection.find({}).limit(10);
+      const cursor = bikesCollection.find({});
       const result = await cursor.toArray();
       res.json(result);
     });
